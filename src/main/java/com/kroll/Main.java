@@ -58,12 +58,14 @@ import java.util.stream.Collectors;
             List<WeatherData> rainyDays = findConsecutiveRainyDays(weatherDataList);
             List<WeatherData> temperatureRiseDays = findTemperatureRiseDays(weatherDataList);
 
-            System.out.printf("| %-10s | %-19s | %-21s | %-20s | %-13s | %-15s |\n", city,
-                    formatWeatherDataList(hottestDays),
-                    formatWeatherDataList(coldestDays),
-                    formatWeatherDataList(mostHumidDays),
-                    formatWeatherDataList(rainyDays),
-                    formatWeatherDataList(temperatureRiseDays));
+            if (!hottestDays.isEmpty() || !coldestDays.isEmpty() || !mostHumidDays.isEmpty() || !rainyDays.isEmpty() || !temperatureRiseDays.isEmpty()) {
+                System.out.printf("| %-10s | %-19s | %-21s | %-20s | %-13s | %-15s |\n", city,
+                        formatWeatherDataList(hottestDays),
+                        formatWeatherDataList(coldestDays),
+                        formatWeatherDataList(mostHumidDays),
+                        formatWeatherDataList(rainyDays),
+                        formatWeatherDataList(temperatureRiseDays));
+            }
         }
 
         private static void aggregateStatistics(List<WeatherData> weatherDataList, String city) {
@@ -74,12 +76,15 @@ import java.util.stream.Collectors;
 
             int monthWithHighestWindSpeed = Collections.max(monthlyAverageWindSpeed.entrySet(), Map.Entry.comparingByValue()).getKey();
 
-            System.out.printf("| %-11s | %-15s | %-18s | %-14s | %-18s |\n", city,
-                    formatMonthlyStatistics(monthlyAverageTemperature),
-                    formatMonthlyStatistics(monthlyAverageHumidity),
-                    formatMonthlyStatistics(monthlyAveragePrecipitation),
-                    monthWithHighestWindSpeed);
+            if (!monthlyAverageTemperature.isEmpty() || !monthlyAverageHumidity.isEmpty() || !monthlyAveragePrecipitation.isEmpty() || !monthlyAverageWindSpeed.isEmpty()) {
+                System.out.printf("| %-11s | %-15s | %-18s | %-14s | %-18s |\n", city,
+                        formatMonthlyStatistics(monthlyAverageTemperature),
+                        formatMonthlyStatistics(monthlyAverageHumidity),
+                        formatMonthlyStatistics(monthlyAveragePrecipitation),
+                        monthWithHighestWindSpeed);
+            }
         }
+
 
         private static List<WeatherData> findConsecutiveRainyDays(List<WeatherData> weatherDataList) {
             List<WeatherData> consecutiveRainyDays = new ArrayList<>();
@@ -172,7 +177,14 @@ import java.util.stream.Collectors;
                         String date = data.getString("dt_txt").split(" ")[0];
                         double temperature = data.getJSONObject("main").getDouble("temp") - 273.15;
                         int humidity = data.getJSONObject("main").getInt("humidity");
-                        double precipitation = data.has("rain") ? data.getJSONObject("rain").getDouble("3h") : 0;
+                        double precipitation = 0;
+                        if (data.has("rain")) {
+                            precipitation += data.getJSONObject("rain").getDouble("3h");
+                        }
+                        if (data.has("snow")) {
+                            precipitation += data.getJSONObject("snow").getDouble("3h");
+                        }
+
                         double windSpeed = data.getJSONObject("wind").getDouble("speed");
 
                         WeatherData weatherData = new WeatherData(date, temperature, humidity, precipitation, windSpeed);
